@@ -1,6 +1,6 @@
 # Signal Atlas live research demo
 
-[Watch the narrated video](Signal-Atlas-Live-Demo.mp4) or read its [transcript](Signal-Atlas-Live-Demo-Transcript.md). Captions are embedded in the video and available separately as [SRT](Signal-Atlas-Live-Demo.srt).
+[Watch the narrated video with captions](https://hoodierat.github.io/signal-atlas/) or read its [transcript](Signal-Atlas-Live-Demo-Transcript.md). You can also [download the MP4](https://hoodierat.github.io/signal-atlas/demo/Signal-Atlas-Live-Demo.mp4). Captions are available as [SRT](Signal-Atlas-Live-Demo.srt) and [WebVTT](Signal-Atlas-Live-Demo.vtt).
 
 The source run used an isolated Signal Atlas profile. The app fetched public pages from Epic Games, sent the retrieved text to the signed-in Codex provider for analysis, and generated its own card digest plus cited HTML and PDF research reports. The narrated video shows rendered pages cropped directly from that generated PDF, together with the run's verified counts. The Windows window capture tool returned a black frame, so this is a document walkthrough rather than a recording of app controls. It uses no fictional database, mock pages, or staged report text.
 

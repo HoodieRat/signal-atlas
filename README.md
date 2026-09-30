@@ -4,7 +4,11 @@ A Windows desktop app that discovers research for chosen topics, stores findings
 
 ## Watch a real research run
 
-[Watch the live research demo](demo/Signal-Atlas-Live-Demo.mp4). It walks through a report Signal Atlas generated from three public Epic Games pages about Unreal Engine 5.8. [The real card digest, HTML report, PDF, source list, and video method](demo/README.md) are available for inspection.
+[![Watch the Signal Atlas live research video](demo/Signal-Atlas-Video-Poster.jpg)](https://hoodierat.github.io/signal-atlas/)
+
+**[▶ Watch the video with captions](https://hoodierat.github.io/signal-atlas/)** · [Download the MP4](https://hoodierat.github.io/signal-atlas/demo/Signal-Atlas-Live-Demo.mp4)
+
+The video walks through a report Signal Atlas generated from three public Epic Games pages about Unreal Engine 5.8. [The real card digest, HTML report, PDF, source list, and video method](demo/README.md) are available for inspection.
 
 ## Download and install on Windows
 
