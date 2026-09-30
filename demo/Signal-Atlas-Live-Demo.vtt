@@ -1,103 +1,115 @@
 WEBVTT
 
-00:00:00.000 --> 00:00:04.640
-On September twenty ninth, Signal Atlas fetched three public Epic Games pages
+00:00:00.000 --> 00:00:04.800
+Open Signal Atlas and choose Start setup. This is the running Windows
 
-00:00:04.720 --> 00:00:09.680
-about Unreal Engine five point eight. It discovered three sources, fetched all
+00:00:04.880 --> 00:00:09.440
+app, captured on September twenty ninth. The setup guide leads through browser
 
-00:00:09.760 --> 00:00:14.960
-three, analyzed all three, and completed without a failed item. This is the
+00:00:09.520 --> 00:00:13.600
+access, a local AI model, topics, and schedules.
 
-00:00:15.200 --> 00:00:17.280
-report the app actually generated.
+00:00:13.970 --> 00:00:18.770
+For live discovery, install the DokoBot command line tool and Edge bridge,
 
-00:00:17.667 --> 00:00:22.387
-The research question asks what these animation updates mean for game teams,
+00:00:18.850 --> 00:00:23.010
+approve the extension, then check the connection. You can also begin with
 
-00:00:22.467 --> 00:00:26.867
-and what should be verified before adoption. The executive summary recommends
+00:00:23.090 --> 00:00:26.130
+Discover links only while configuring the rest.
 
-00:00:27.027 --> 00:00:32.227
-focused trials. It also makes clear that all three sources come from Epic,
+00:00:26.512 --> 00:00:31.792
+In Setup, open AI model. LM Studio is the local option and needs
 
-00:00:32.307 --> 00:00:35.347
-so independent production results are still missing.
+00:00:31.952 --> 00:00:36.992
+no OpenAI API key. Install a model in LM Studio, then
 
-00:00:35.717 --> 00:00:40.437
-The analysis distinguishes Control Rig Physics, Control Rig Dynamics, and
+00:00:37.072 --> 00:00:39.312
+click Find installed models.
 
-00:00:40.517 --> 00:00:45.637
-experimental Direct Mesh Controls. It treats Epic’s fivefold solver speed
+00:00:39.682 --> 00:00:44.522
+Highlight a model in the installed list and click Use selected model. The
 
-00:00:45.717 --> 00:00:50.277
-claim as a solver measurement, not a promise of faster total frame time.
+00:00:44.562 --> 00:00:49.282
+chosen model appears above the test. Testing the highlighted row saves that
 
-00:00:50.837 --> 00:00:54.837
-That difference matters when a team budgets characters and simulation.
+00:00:49.362 --> 00:00:50.962
+selection automatically.
 
-00:00:55.217 --> 00:00:59.857
-This table compares reported capabilities with concrete verification. The
+00:00:51.348 --> 00:00:56.388
+Here, the installed Qwen three four B model loaded in LM Studio,
 
-00:01:00.057 --> 00:01:04.257
-updated animation sample demonstrates powered ragdolls and motion matched
+00:00:56.468 --> 00:01:01.508
+analyzed a short diagnostic document, and unloaded successfully. The status
 
-00:01:04.337 --> 00:01:08.417
-recovery. The report does not assume that the sample uses the separate
+00:01:01.588 --> 00:01:06.708
+bar shows the real passing result. If resources are insufficient, the app now
 
-00:01:08.497 --> 00:01:12.497
-Dynamics solver, or that it inherits the solver speed claim.
+00:01:06.788 --> 00:01:08.708
+names the specific constraint.
 
-00:01:12.883 --> 00:01:17.283
-The report uses Epic’s five point eight point three hotfix announcement as a
+00:01:09.098 --> 00:01:13.978
+Next, configure topics and sources. Topics control what the app looks
 
-00:01:17.363 --> 00:01:21.923
-source of regression cases. It calls out deeper state stacks, Sequencer
+00:01:14.058 --> 00:01:18.778
+for; sources determine where it searches. The example topics can get you
 
-00:01:22.003 --> 00:01:27.283
-lifecycle problems, time warp refresh, and MetaHuman mask behavior. A
+00:01:19.018 --> 00:01:21.418
+started, and you can edit or replace them.
 
-00:01:27.363 --> 00:01:31.603
-reported fix still needs to be reproduced in a team’s intended build.
+00:01:21.807 --> 00:01:26.927
+On Reports, choose cards, a research report, or both. Reports can
 
-00:01:31.973 --> 00:01:36.293
-The generated risk register pairs each reported issue with potential impact
+00:01:27.007 --> 00:01:31.807
+target one to twenty pages, with a research question, audience, and evidence
 
-00:01:36.613 --> 00:01:41.733
-and a testable mitigation. This is a structured report exhibit, with citations
+00:01:32.007 --> 00:01:36.927
+supported items such as comparisons, timelines, risk registers, and action
 
-00:01:41.813 --> 00:01:46.213
-back to the published hotfix. It is not a row of resource cards.
+00:01:37.007 --> 00:01:37.807
+plans.
 
-00:01:46.598 --> 00:01:51.718
-The final section proposes staged evaluation. Teams should profile complete
+00:01:38.182 --> 00:01:43.462
+On Home, choose Run Now for the full research pipeline. Discover links
 
-00:01:51.798 --> 00:01:56.998
-animation and frame cost, replay the relevant hotfix cases, and test sample
+00:01:43.622 --> 00:01:48.902
+only creates source cards without AI. After a full run, open Reports to
 
-00:01:57.238 --> 00:02:01.798
-derived physics and motion selection in a limited gameplay slice. The action
+00:01:49.142 --> 00:01:53.622
+inspect the cards, narrative HTML, and paginated PDF.
 
-00:02:01.958 --> 00:02:04.838
-table includes explicit success criteria.
+00:01:53.992 --> 00:01:58.392
+This is a card digest from a completed public source run. It gives a quick
 
-00:02:05.223 --> 00:02:09.543
-The conclusion recommends adoption only after representative project tests
+00:01:58.472 --> 00:02:02.952
+view of discovered items and links to their originals. The published example
 
-00:02:09.623 --> 00:02:14.503
-pass. The final references link to all three Epic pages. The
+00:02:03.112 --> 00:02:08.392
+used Codex with ChatGPT for analysis; the local LM Studio test shown
 
-00:02:14.743 --> 00:02:19.863
-report also states its scope: three vendor sources, selected from this run,
+00:02:08.472 --> 00:02:10.952
+earlier is a separate verified run.
 
-00:02:19.943 --> 00:02:22.183
-not an exhaustive literature review.
+00:02:11.325 --> 00:02:16.525
+The same completed example also produced a cited four page report. It includes
 
-00:02:22.557 --> 00:02:27.357
-This video uses the actual generated Signal Atlas PDF. The public
+00:02:16.565 --> 00:02:21.245
+a research question, executive summary, evidence limits, findings, and
 
-00:02:27.757 --> 00:02:32.877
-repository also includes the original card digest, narrative HTML, and the
+00:02:21.325 --> 00:02:26.525
+references. The repository provides this PDF and the card digest so you
 
-00:02:32.957 --> 00:02:36.797
-PDF so you can inspect the evidence and the report yourself.
+00:02:26.605 --> 00:02:28.765
+can inspect the actual outputs.
+
+00:02:29.135 --> 00:02:33.335
+Use your own topics and sources, choose your preferred output, and run a
+
+00:02:33.375 --> 00:02:38.575
+manual scan before enabling the schedule. With LM Studio, no OpenAI
+
+00:02:38.655 --> 00:02:43.135
+key is needed. Report depth and length depend on the evidence and the model
+
+00:02:43.215 --> 00:02:44.095
+you select.

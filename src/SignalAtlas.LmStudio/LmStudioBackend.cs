@@ -62,7 +62,7 @@ public sealed class LmStudioBackend : IModelBackend
     {
         var result=await Cli(token,"load","--estimate-only",model,"--context-length",context.ToString(),"--gpu",gpu);
         if(result.ExitCode!=0)return null;
-        var match=Regex.Match(result.Output,@"Estimated GPU Memory:\s*([\d.]+)\s*(GB|MB|GiB|MiB)",RegexOptions.IgnoreCase);
+        var match=Regex.Match(result.Output+"\n"+result.Error,@"Estimated GPU Memory:\s*([\d.]+)\s*(GB|MB|GiB|MiB)",RegexOptions.IgnoreCase);
         if(!match.Success)return null;
         double amount=double.Parse(match.Groups[1].Value,System.Globalization.CultureInfo.InvariantCulture);
         return (long)(amount*(match.Groups[2].Value.StartsWith("G",StringComparison.OrdinalIgnoreCase)?1024d*1024*1024:1024d*1024));
@@ -74,16 +74,15 @@ public sealed class LmStudioBackend : IModelBackend
         if(string.IsNullOrEmpty(_lms)){DeferredReason="LM Studio CLI unavailable";return false;}
         if(await IdentifierLoaded(cancellationToken)){DeferredReason="The signal-atlas identifier is already loaded by another session";return false;}
         var models=await InstalledAsync(cancellationToken);
-        var fallback=models.FirstOrDefault(x=>x.Key=="qwen/qwen3-4b-2507")?.Key;
+        if(!models.Any(x=>x.Key==modelKey)){DeferredReason=$"Selected model '{modelKey}' is not installed in LM Studio. Find installed models and choose one from the list.";return false;}
         var candidates=new List<(string Model,int Context,string Gpu)>{(modelKey,PreferredContext,"max"),(modelKey,MinimumContext,"max"),(modelKey,MinimumContext,"0.75")};
-        if(fallback is not null && fallback!=modelKey)candidates.Add((fallback,MinimumContext,"0.75"));
         foreach(var (model,context,gpu) in candidates)
         {
-            if(!models.Any(x=>x.Key==model))continue;
             long? estimate=await EstimateAsync(model,context,gpu,cancellationToken);
-            if(estimate is null)continue;
-            var decision=ResourceGovernor.Decide(_probe.Sample(),estimate.Value,context,MinimumContext,gpu,RestrictBattery);
-            if(decision.Decision==ResourceDecision.Defer){DeferredReason=decision.Reason;continue;}
+            if(estimate is null){DeferredReason=$"LM Studio could not estimate memory for '{model}' at {context:N0} context. Try a smaller installed model or update LM Studio.";continue;}
+            var sample=_probe.Sample();
+            var decision=ResourceGovernor.Decide(sample,estimate.Value,context,MinimumContext,gpu,RestrictBattery);
+            if(decision.Decision==ResourceDecision.Defer){DeferredReason=$"{model}: {decision.Reason}. Available RAM {sample.AvailableRamBytes/1073741824d:F1} GiB; estimated GPU use {estimate.Value/1073741824d:F1} GiB. Free system resources or choose a smaller model, then test again.";continue;}
             if(decision.Context<context)continue;
             var status=await Cli(cancellationToken,"server","status","--json");
             bool running=false;
@@ -101,7 +100,7 @@ public sealed class LmStudioBackend : IModelBackend
             File.WriteAllText(_ownerFile,JsonSerializer.Serialize(new{serverOwnedBySignalAtlas=_serverOwned,modelIdentifier="signal-atlas",modelKey=model,processId=Environment.ProcessId,loadedUtc=DateTimeOffset.UtcNow}));
             return true;
         }
-        DeferredReason??="No installed model configuration passed resource checks";return false;
+        DeferredReason??=$"LM Studio could not load selected model '{modelKey}'. Try a smaller installed model.";return false;
     }
     public async Task<Analysis?> AnalyzeAsync(Document document,Topic topic,CancellationToken cancellationToken)
     {

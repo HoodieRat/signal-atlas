@@ -2,13 +2,13 @@
 
 A Windows desktop app that discovers research for chosen topics, stores findings in SQLite, and analyzes them with a selected AI provider. Choose the original card digest, a professional research report in HTML and PDF, or both. Reports have a selectable 1–20 page target, cited analysis, conclusions, references, and optional specialized sections.
 
-## Watch a real research run
+## Watch the setup and research walkthrough
 
 [![Watch the Signal Atlas live research video](demo/Signal-Atlas-Video-Poster.jpg)](https://hoodierat.github.io/signal-atlas/)
 
-**[▶ Watch the video with captions](https://hoodierat.github.io/signal-atlas/)** · [Download the MP4](https://hoodierat.github.io/signal-atlas/demo/Signal-Atlas-Live-Demo.mp4?v=elevenlabs-v1)
+**[▶ Watch the video with captions](https://hoodierat.github.io/signal-atlas/)** · [Download the MP4](https://hoodierat.github.io/signal-atlas/demo/Signal-Atlas-Live-Demo.mp4?v=howto-v2)
 
-The video has ElevenLabs narration and walks through a report Signal Atlas generated from three public Epic Games pages about Unreal Engine 5.8. [The real card digest, HTML report, PDF, source list, and video method](demo/README.md) are available for inspection.
+The video uses real app captures to walk through setup, a successful local LM Studio model test, topics and sources, report settings, and a manual run. It then shows [actual card and report output](demo/README.md) from a separate completed Codex analysis run. ElevenLabs provides the narration.
 
 ## Download and install on Windows
 
@@ -26,7 +26,7 @@ The release is for Windows 10 or 11 x64 and includes the .NET runtime. No progra
 1. In **Setup → Topics**, click **Add example topics**.
 2. Go to **Home** and click **Discover links only**. This tests discovery and creates source cards without an AI account.
 3. When the run finishes, open **Reports**, select the newest result, and click **Open cards**. Research outputs are saved under `Documents\Signal Atlas\Reports`.
-4. For the full workflow, complete **Setup → Browser**, choose and test a provider in **AI Model**, then click **Run Now** on Home. Leave scheduled monitoring off until the manual test succeeds.
+4. For the full workflow, complete **Setup → Browser**. In **Setup → AI model**, click **Find installed models**, highlight one, click **Use selected model**, then **Test selected model**. LM Studio needs no OpenAI API key. Click **Run Now** on Home after setup; leave scheduled monitoring off until the manual test succeeds.
 
 Browser capture requires DokoBot and its browser bridge. Its in-app installer requires Node.js LTS. See [architecture](docs/ARCHITECTURE.md) for how runs work.
 

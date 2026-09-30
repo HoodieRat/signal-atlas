@@ -7,6 +7,34 @@ namespace SignalAtlas.UnitTests;
 
 public sealed class LmStudioTests
 {
+    [Fact] public async Task MissingSelectedModelIsReportedWithoutLoadingAnotherModel()
+    {
+        bool triedToLoad=false;
+        Task<(int ExitCode,string Output,string Error)> Cli(CancellationToken _,string[] args)
+        {
+            if(args.SequenceEqual(["ps","--json"]))return Task.FromResult((0,"[]",""));
+            if(args.SequenceEqual(["ls","--json"]))return Task.FromResult((0,"[{\"type\":\"llm\",\"modelKey\":\"available\",\"displayName\":\"Available\"}]",""));
+            triedToLoad=true;return Task.FromResult((1,"","unexpected load"));
+        }
+        var backend=new LmStudioBackend(new FakeProbe(),cli:Cli);
+        Assert.False(await backend.PrepareAsync("missing",CancellationToken.None));
+        Assert.Contains("not installed",backend.DeferredReason);
+        Assert.False(triedToLoad);
+    }
+    [Fact] public async Task ResourceDeferralNamesTheSelectedModelAndMeasuredRam()
+    {
+        Task<(int ExitCode,string Output,string Error)> Cli(CancellationToken _,string[] args)
+        {
+            if(args.SequenceEqual(["ps","--json"]))return Task.FromResult((0,"[]",""));
+            if(args.SequenceEqual(["ls","--json"]))return Task.FromResult((0,"[{\"type\":\"llm\",\"modelKey\":\"selected\",\"displayName\":\"Selected\"}]",""));
+            if(args.Take(2).SequenceEqual(["load","--estimate-only"]))return Task.FromResult((0,"Estimated GPU Memory: 1.50 GiB",""));
+            throw new InvalidOperationException("Unexpected load");
+        }
+        var backend=new LmStudioBackend(new LowRamProbe(),cli:Cli);
+        Assert.False(await backend.PrepareAsync("selected",CancellationToken.None));
+        Assert.Contains("selected",backend.DeferredReason);
+        Assert.Contains("3.0 GiB",backend.DeferredReason);
+    }
     [Fact] public async Task OwnedModelUsesStructuredInferenceAndUnloads()
     {
         string root=Path.Combine(Path.GetTempPath(),"SignalAtlasLmTest-"+Guid.NewGuid().ToString("N"));
@@ -16,7 +44,7 @@ public sealed class LmStudioTests
             string command=string.Join(' ',args);
             if(command=="ls --json")return Task.FromResult((0,"[{\"type\":\"llm\",\"modelKey\":\"qwen/qwen3-4b-2507\",\"displayName\":\"Qwen 4B\",\"sizeBytes\":2300000000}]", ""));
             if(command=="ps --json")return Task.FromResult((0,loaded?"[{\"identifier\":\"signal-atlas\"}]":"[]",""));
-            if(command.StartsWith("load --estimate-only"))return Task.FromResult((0,"Estimated GPU Memory: 1.50 GiB\nEstimated Total Memory: 2.00 GiB",""));
+            if(command.StartsWith("load --estimate-only"))return Task.FromResult((0,"","Estimated GPU Memory: 1.50 GiB\nEstimated Total Memory: 2.00 GiB"));
             if(command=="server status --json")return Task.FromResult((0,"{\"running\":true,\"port\":12345}",""));
             if(command.StartsWith("load ")){loaded=true;return Task.FromResult((0,"loaded",""));}
             if(command=="unload signal-atlas"){loaded=false;unloads++;return Task.FromResult((0,"unloaded",""));}
@@ -43,6 +71,10 @@ public sealed class LmStudioTests
     private sealed class FakeProbe:IResourceProbe
     {
         public ResourceSnapshot Sample(){const long g=1024L*1024*1024;return new(8*g,10*g,8*g,g,null,100,true);}
+    }
+    private sealed class LowRamProbe:IResourceProbe
+    {
+        public ResourceSnapshot Sample(){const long g=1024L*1024*1024;return new(3*g,10*g,8*g,g,null,100,true);}
     }
     private sealed class FakeHandler:HttpMessageHandler
     {

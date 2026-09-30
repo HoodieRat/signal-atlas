@@ -1,37 +1,45 @@
-# Signal Atlas live demo transcript
+# Signal Atlas how-to walkthrough transcript
 
-## Signal Atlas: a real research run
+## Open the app
 
-On September twenty ninth, Signal Atlas fetched three public Epic Games pages about Unreal Engine five point eight. It discovered three sources, fetched all three, analyzed all three, and completed without a failed item. This is the report the app actually generated.
+Open Signal Atlas and choose Start setup. This is the running Windows app, captured on September twenty ninth. The setup guide leads through browser access, a local AI model, topics, and schedules.
 
-## Research question and executive summary
+## Connect the browser
 
-The research question asks what these animation updates mean for game teams, and what should be verified before adoption. The executive summary recommends focused trials. It also makes clear that all three sources come from Epic, so independent production results are still missing.
+For live discovery, install the DokoBot command line tool and Edge bridge, approve the extension, then check the connection. You can also begin with Discover links only while configuring the rest.
 
-## Reported capabilities and limits
+## Set up LM Studio
 
-The analysis distinguishes Control Rig Physics, Control Rig Dynamics, and experimental Direct Mesh Controls. It treats Epic’s fivefold solver speed claim as a solver measurement, not a promise of faster total frame time. That difference matters when a team budgets characters and simulation.
+In Setup, open AI model. LM Studio is the local option and needs no OpenAI API key. Install a model in LM Studio, then click Find installed models.
 
-## A comparison with adoption checks
+## Choose the model
 
-This table compares reported capabilities with concrete verification. The updated animation sample demonstrates powered ragdolls and motion matched recovery. The report does not assume that the sample uses the separate Dynamics solver, or that it inherits the solver speed claim.
+Highlight a model in the installed list and click Use selected model. The chosen model appears above the test. Testing the highlighted row saves that selection automatically.
 
-## Current hotfix evidence
+## Run a real test
 
-The report uses Epic’s five point eight point three hotfix announcement as a source of regression cases. It calls out deeper state stacks, Sequencer lifecycle problems, time warp refresh, and MetaHuman mask behavior. A reported fix still needs to be reproduced in a team’s intended build.
+Here, the installed Qwen three four B model loaded in LM Studio, analyzed a short diagnostic document, and unloaded successfully. The status bar shows the real passing result. If resources are insufficient, the app now names the specific constraint.
 
-## A real risk register
+## Choose topics and sources
 
-The generated risk register pairs each reported issue with potential impact and a testable mitigation. This is a structured report exhibit, with citations back to the published hotfix. It is not a row of resource cards.
+Next, configure topics and sources. Topics control what the app looks for; sources determine where it searches. The example topics can get you started, and you can edit or replace them.
 
-## An adoption plan
+## Choose the output
 
-The final section proposes staged evaluation. Teams should profile complete animation and frame cost, replay the relevant hotfix cases, and test sample derived physics and motion selection in a limited gameplay slice. The action table includes explicit success criteria.
+On Reports, choose cards, a research report, or both. Reports can target one to twenty pages, with a research question, audience, and evidence supported items such as comparisons, timelines, risk registers, and action plans.
 
-## Conclusions and references
+## Run research
 
-The conclusion recommends adoption only after representative project tests pass. The final references link to all three Epic pages. The report also states its scope: three vendor sources, selected from this run, not an exhaustive literature review.
+On Home, choose Run Now for the full research pipeline. Discover links only creates source cards without AI. After a full run, open Reports to inspect the cards, narrative HTML, and paginated PDF.
 
-## Inspect the actual output
+## Inspect the cards
 
-This video uses the actual generated Signal Atlas PDF. The public repository also includes the original card digest, narrative HTML, and the PDF so you can inspect the evidence and the report yourself.
+This is a card digest from a completed public source run. It gives a quick view of discovered items and links to their originals. The published example used Codex with ChatGPT for analysis; the local LM Studio test shown earlier is a separate verified run.
+
+## Read the report
+
+The same completed example also produced a cited four page report. It includes a research question, executive summary, evidence limits, findings, and references. The repository provides this PDF and the card digest so you can inspect the actual outputs.
+
+## Continue with your own topic
+
+Use your own topics and sources, choose your preferred output, and run a manual scan before enabling the schedule. With LM Studio, no OpenAI key is needed. Report depth and length depend on the evidence and the model you select.

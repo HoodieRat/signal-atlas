@@ -152,6 +152,7 @@ public sealed partial class MainViewModel:INotifyPropertyChanged
     public ICommand StopCommand{get;}
     public ICommand LoadModelsCommand{get;}
     public ICommand SelectModelCommand{get;}
+    public ICommand TestLocalModelCommand{get;}
     public ICommand TestModelCommand{get;}
     public ICommand SaveAiSettingsCommand{get;}
     public ICommand CheckCodexCommand{get;}
@@ -192,6 +193,7 @@ public sealed partial class MainViewModel:INotifyPropertyChanged
         EnableMonitoringCommand=new AsyncCommand(()=>SetMonitoringAsync(true));PauseMonitoringCommand=new AsyncCommand(()=>SetMonitoringAsync(false));
         RunNowCommand=new AsyncCommand(RunNowAsync);DiscoveryOnlyCommand=new AsyncCommand(()=>LaunchRunnerAsync(null,null,true));StopCommand=new AsyncCommand(StopAsync);
         LoadModelsCommand=new AsyncCommand(LoadModelsAsync);SelectModelCommand=new AsyncCommand(SelectModelAsync);
+        TestLocalModelCommand=new AsyncCommand(TestLocalModelAsync);
         TestModelCommand=new AsyncCommand(TestModelAsync);
         SaveAiSettingsCommand=new AsyncCommand(SaveAiSettingsAsync);
         CheckCodexCommand=new AsyncCommand(CheckCodexAsync);
@@ -241,8 +243,9 @@ public sealed partial class MainViewModel:INotifyPropertyChanged
         using var process=Process.Start(psi)??throw new InvalidOperationException("Runner did not start");Status="Research running";await process.WaitForExitAsync();Refresh();Status=process.ExitCode==0?"Report ready":$"Run ended with code {process.ExitCode}";
     }
     private Task StopAsync(){var run=_db.LatestRun();if(run?.Status=="active"){File.WriteAllText(Path.Combine(AppPaths.State,"cancel-"+run.Id+".flag"),"cancel");Status="Stop requested";}return Task.CompletedTask;}
-    private async Task LoadModelsAsync(){var models=await new LmStudioBackend(new WindowsResourceProbe()).InstalledAsync(CancellationToken.None);Refill(Models,models);Status=$"{models.Count} local models found";}
-    private Task SelectModelAsync(){if(SelectedModel is null)throw new InvalidOperationException("Select a model");_db.SetSetting("selected_model",SelectedModel.Key);Changed(nameof(SelectedModelKey));Status="Model selected: "+SelectedModel.Name;return Task.CompletedTask;}
+    private async Task LoadModelsAsync(){var models=await new LmStudioBackend(new WindowsResourceProbe()).InstalledAsync(CancellationToken.None);Refill(Models,models);SelectedModel=Models.FirstOrDefault(x=>x.Key==SelectedModelKey);Status=$"{models.Count} local models found";}
+    private Task SelectModelAsync(){if(SelectedModel is null)throw new InvalidOperationException("Select a model");AiProvider="lm_studio";_db.SetSetting("selected_model",SelectedModel.Key);Changed(nameof(SelectedModelKey));Status="Model selected: "+SelectedModel.Name;return Task.CompletedTask;}
+    private async Task TestLocalModelAsync(){AiProvider="lm_studio";await TestModelAsync();}
     private IModelBackend SelectedBackend()=>AiProvider switch
     {
         "openai_api"=>new OpenAiApiBackend(),
@@ -255,21 +258,23 @@ public sealed partial class MainViewModel:INotifyPropertyChanged
         using var deadline=new CancellationTokenSource(TimeSpan.FromMinutes(3));
         try
         {
-            Status="Testing selected AI provider";
+            if(AiProvider=="lm_studio" && SelectedModel is not null)await SelectModelAsync();
             string model=AiProvider switch{"openai_api"=>OpenAiModel,"codex_chatgpt"=>"codex-chatgpt",_=>SelectedModelKey};
-            if(!await backend.PrepareAsync(model,deadline.Token)){Status="AI test deferred: "+backend.DeferredReason;return;}
+            Status="Testing "+model;
+            if(!await backend.PrepareAsync(model,deadline.Token)){Status=$"AI test deferred for {model}: {backend.DeferredReason}";return;}
             var topic=new Topic(0,"procedural animation","",50,168,1,true,[new("procedural animation","include")]);
             var document=new Document(0,0,"https://example.org/test","Procedural animation test","This diagnostic text describes procedural animation techniques for research analysis. It contains no external claims.","",null,DateTimeOffset.UtcNow,true,0,1);
             var analysis=await backend.AnalyzeAsync(document,topic,deadline.Token);
-            Status=analysis is null?"AI test returned no result":"AI test passed";
+            Status=analysis is null?$"AI test returned no result for {model}":$"AI test passed: {model}";
         }
         finally{await backend.CleanupAsync(CancellationToken.None);}
     }
     private Task SaveAiSettingsAsync()
     {
         string model=OpenAiModel.Trim();
-        if(model.Length is <1 or >100 || !System.Text.RegularExpressions.Regex.IsMatch(model,"^[A-Za-z0-9._-]+$"))throw new ArgumentException("Enter a valid OpenAI model ID");
-        _db.SetSetting("openai_model",model);_db.SetSetting("ai_provider",AiProvider);OpenAiModel=model;Status="AI provider settings saved";
+        if(AiProvider=="openai_api" && (model.Length is <1 or >100 || !System.Text.RegularExpressions.Regex.IsMatch(model,"^[A-Za-z0-9._-]+$")))throw new ArgumentException("Enter a valid OpenAI model ID");
+        if(AiProvider=="openai_api"){_db.SetSetting("openai_model",model);OpenAiModel=model;}
+        _db.SetSetting("ai_provider",AiProvider);Status="AI provider settings saved";
         return Task.CompletedTask;
     }
     private async Task CheckApiAsync()
