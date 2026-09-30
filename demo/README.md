@@ -1,8 +1,8 @@
 # Signal Atlas live research demo
 
-[Watch the narrated video with captions](https://hoodierat.github.io/signal-atlas/) or read its [transcript](Signal-Atlas-Live-Demo-Transcript.md). You can also [download the MP4](https://hoodierat.github.io/signal-atlas/demo/Signal-Atlas-Live-Demo.mp4). Captions are available as [SRT](Signal-Atlas-Live-Demo.srt) and [WebVTT](Signal-Atlas-Live-Demo.vtt).
+[Watch the narrated video with captions](https://hoodierat.github.io/signal-atlas/) or read its [transcript](Signal-Atlas-Live-Demo-Transcript.md). You can also [download the MP4](https://hoodierat.github.io/signal-atlas/demo/Signal-Atlas-Live-Demo.mp4?v=elevenlabs-v1). Captions are available as [SRT](Signal-Atlas-Live-Demo.srt) and [WebVTT](Signal-Atlas-Live-Demo.vtt).
 
-The source run used an isolated Signal Atlas profile. The app fetched public pages from Epic Games, sent the retrieved text to the signed-in Codex provider for analysis, and generated its own card digest plus cited HTML and PDF research reports. The narrated video shows rendered pages cropped directly from that generated PDF, together with the run's verified counts. The Windows window capture tool returned a black frame, so this is a document walkthrough rather than a recording of app controls. It uses no fictional database, mock pages, or staged report text.
+The source run used an isolated Signal Atlas profile. The app fetched public pages from Epic Games, sent the retrieved text to the signed-in Codex provider for analysis, and generated its own card digest plus cited HTML and PDF research reports. The narrated video shows rendered pages cropped directly from that generated PDF, together with the run's verified counts. Its voiceover was generated with ElevenLabs v4 using Bella (Professional, Bright, Warm), then leveled for clear playback. The ElevenLabs API key was kept outside this repository and is not included in the video or release. The Windows window capture tool returned a black frame, so this is a document walkthrough rather than a recording of app controls. It uses no fictional database, mock pages, or staged report text.
 
 Sources retrieved for the run:
 
