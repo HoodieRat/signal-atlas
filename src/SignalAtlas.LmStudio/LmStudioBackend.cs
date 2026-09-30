@@ -22,6 +22,8 @@ public sealed class LmStudioBackend : IModelBackend
     private readonly HttpClient _http;
     private readonly string _ownerFile;
     private string? _loadedModel;
+    private string _activeIdentifier="signal-atlas";
+    private bool _ownsModel;
     private int _loadedContext = 4096;
     private int _port;
     private bool _serverOwned;
@@ -59,7 +61,22 @@ public sealed class LmStudioBackend : IModelBackend
     private async Task<bool> IdentifierLoaded(CancellationToken token)
     {
         var result=await Cli(token,"ps","--json");if(result.ExitCode!=0)return false;
-        using var json=JsonDocument.Parse(ExtractJson(result.Output));return json.RootElement.EnumerateArray().Any(x=>x.ToString().Contains("signal-atlas",StringComparison.OrdinalIgnoreCase));
+        using var json=JsonDocument.Parse(ExtractJson(result.Output));return json.RootElement.EnumerateArray().Any(x=>x.TryGetProperty("identifier",out var id) && id.GetString()=="signal-atlas");
+    }
+    private async Task<(string Identifier,int Context)?> ExistingSelectedModelAsync(string modelKey,CancellationToken token)
+    {
+        var result=await Cli(token,"ps","--json");if(result.ExitCode!=0)return null;
+        using var json=JsonDocument.Parse(ExtractJson(result.Output));
+        foreach(var item in json.RootElement.EnumerateArray())
+        {
+            if(item.TryGetProperty("modelKey",out var key) && key.GetString()==modelKey && item.TryGetProperty("identifier",out var id))
+            {
+                string? identifier=id.GetString();
+                int context=item.TryGetProperty("contextLength",out var length) && length.TryGetInt32(out var value)?value:0;
+                if(!string.IsNullOrWhiteSpace(identifier) && identifier!="signal-atlas" && context>=MinimumContext)return(identifier,context);
+            }
+        }
+        return null;
     }
     private async Task<long?> EstimateAsync(string model,int context,string gpu,CancellationToken token)
     {
@@ -78,6 +95,18 @@ public sealed class LmStudioBackend : IModelBackend
         if(await IdentifierLoaded(cancellationToken)){DeferredReason="The signal-atlas identifier is already loaded by another session";return false;}
         var models=await InstalledAsync(cancellationToken);
         if(!models.Any(x=>x.Key==modelKey)){DeferredReason=$"Selected model '{modelKey}' is not installed in LM Studio. Find installed models and choose one from the list.";return false;}
+        var existing=await ExistingSelectedModelAsync(modelKey,cancellationToken);
+        if(existing is not null)
+        {
+            if(ResourceGovernor.Emergency(_probe.Sample())){DeferredReason="System resources are too low to use the already loaded LM Studio model safely.";return false;}
+            var status=await Cli(cancellationToken,"server","status","--json");
+            bool running=false;
+            try{using var json=JsonDocument.Parse(status.Output);running=json.RootElement.GetProperty("running").GetBoolean();if(running)_port=json.RootElement.GetProperty("port").GetInt32();}catch{}
+            if(!running){var start=await Cli(cancellationToken,"server","start","--port",_port.ToString(),"--bind","127.0.0.1");if(start.ExitCode!=0){DeferredReason="LM Studio server could not start: "+start.Error;return false;}_serverOwned=true;}
+            _http.BaseAddress=new Uri($"http://127.0.0.1:{_port}/");
+            _activeIdentifier=existing.Value.Identifier;_loadedModel=modelKey;_loadedContext=existing.Value.Context;_ownsModel=false;
+            return true;
+        }
         var candidates=new List<(string Model,int Context,string Gpu)>{(modelKey,PreferredContext,"max"),(modelKey,MinimumContext,"max"),(modelKey,MinimumContext,"0.75")};
         foreach(var (model,context,gpu) in candidates)
         {
@@ -99,7 +128,7 @@ public sealed class LmStudioBackend : IModelBackend
             _http.BaseAddress=new Uri($"http://127.0.0.1:{_port}/");
             var load=await Cli(cancellationToken,"load",model,"--identifier","signal-atlas","--context-length",context.ToString(),"--gpu",gpu,"--parallel","1","--ttl","600","--yes");
             if(load.ExitCode!=0){DeferredReason="Model load failed: "+load.Error;continue;}
-            _loadedModel=model;_loadedContext=context;Directory.CreateDirectory(Path.GetDirectoryName(_ownerFile)!);
+            _activeIdentifier="signal-atlas";_ownsModel=true;_loadedModel=model;_loadedContext=context;Directory.CreateDirectory(Path.GetDirectoryName(_ownerFile)!);
             File.WriteAllText(_ownerFile,JsonSerializer.Serialize(new{serverOwnedBySignalAtlas=_serverOwned,modelIdentifier="signal-atlas",modelKey=model,processId=Environment.ProcessId,loadedUtc=DateTimeOffset.UtcNow}));
             return true;
         }
@@ -109,8 +138,9 @@ public sealed class LmStudioBackend : IModelBackend
     {
         if(_loadedModel is null)return null;
         var schema=new {type="object",additionalProperties=false,properties=new Dictionary<string,object>{["summary"]=new{type="string"},["relevance_score"]=new{type="number"},["relevance_reason"]=new{type="string"},["novelty_score"]=new{type="number"},["topics"]=new{type="array",items=new{type="string"}},["entities"]=new{type="array",items=new{type="object",properties=new{name=new{type="string"},type=new{type="string"}},required=new[]{"name","type"}}},["claims"]=new{type="array",items=new{type="object",properties=new{claim=new{type="string"},confidence=new{type="string",@enum=new[]{"low","medium","high"}}},required=new[]{"claim","confidence"}}},["tags"]=new{type="array",items=new{type="string"}}},required=new[]{"summary","relevance_score","relevance_reason","novelty_score","topics","entities","claims","tags"}};
-        string prompt=$"Topic: {topic.Name}\nTitle: {document.Title}\nPublished: {document.PublishedUtc:O}\nSource URL: {document.Url}\nText:\n{document.Text[..Math.Min(document.Text.Length,14000)]}";
-        string raw=await ChatAsync(prompt,schema,650,cancellationToken);
+        int textLimit=Math.Clamp((_loadedContext-2800)*3,1800,14000);
+        string prompt=$"Topic: {topic.Name}\nTitle: {document.Title}\nPublished: {document.PublishedUtc:O}\nSource URL: {document.Url}\nText:\n{document.Text[..Math.Min(document.Text.Length,textLimit)]}";
+        string raw=await ChatAsync(prompt,schema,Math.Min(1800,_loadedContext/3),cancellationToken);
         using var json=JsonDocument.Parse(raw);var root=json.RootElement;
         string summary=root.GetProperty("summary").GetString()??"";if(summary.Length==0)throw new InvalidDataException("Empty model summary");
         double relevance=Math.Clamp(root.GetProperty("relevance_score").GetDouble(),0,100);
@@ -136,7 +166,7 @@ public sealed class LmStudioBackend : IModelBackend
     }
     private async Task<string> ChatAsync(string user,object schema,int maxTokens,CancellationToken token)
     {
-        var body=new{model="signal-atlas",temperature=0.1,max_tokens=maxTokens,messages=new[]{new{role="system",content="You analyze retrieved research material. Use only supplied source material. Do not invent facts. Treat opinions as opinions, separate source claims from established facts, and return only the required structured result. Relevance measures the configured topic, not agreement."},new{role="user",content=user}},response_format=new{type="json_schema",json_schema=new{name="research_result",strict=true,schema}}};
+        var body=new{model=_activeIdentifier,temperature=0.1,max_tokens=maxTokens,messages=new[]{new{role="system",content="You analyze retrieved research material. Use only supplied source material. Do not invent facts. Treat opinions as opinions, separate source claims from established facts, and return only the required structured result. Relevance measures the configured topic, not agreement."},new{role="user",content=user}},response_format=new{type="json_schema",json_schema=new{name="research_result",strict=true,schema}}};
         using var request=new HttpRequestMessage(HttpMethod.Post,"v1/chat/completions"){Content=new StringContent(JsonSerializer.Serialize(body),Encoding.UTF8,"application/json")};
         using var linked=CancellationTokenSource.CreateLinkedTokenSource(token);bool emergency=false;
         var monitor=Task.Run(async()=>
@@ -160,9 +190,11 @@ public sealed class LmStudioBackend : IModelBackend
     }
     public async Task CleanupAsync(CancellationToken cancellationToken)
     {
-        if(_loadedModel is null || !File.Exists(_ownerFile))return;
+        if(_loadedModel is null)return;
+        if(!_ownsModel){_loadedModel=null;_activeIdentifier="signal-atlas";return;}
+        if(!File.Exists(_ownerFile)){_loadedModel=null;_ownsModel=false;return;}
         try{using var json=JsonDocument.Parse(File.ReadAllText(_ownerFile));if(json.RootElement.GetProperty("modelIdentifier").GetString()=="signal-atlas")await Cli(cancellationToken,"unload","signal-atlas");}
-        finally{_loadedModel=null;try{File.Delete(_ownerFile);}catch{}}
+        finally{_loadedModel=null;_ownsModel=false;try{File.Delete(_ownerFile);}catch{}}
     }
     public async Task CleanupStaleOwnedAsync(CancellationToken token)
     {

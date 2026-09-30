@@ -7,6 +7,30 @@ namespace SignalAtlas.UnitTests;
 
 public sealed class LmStudioTests
 {
+    [Fact] public async Task ReusesSelectedModelAlreadyLoadedByUserWithoutUnloadingIt()
+    {
+        bool loadedByApp=false;bool unloadedByApp=false;
+        Task<(int ExitCode,string Output,string Error)> Cli(CancellationToken _,string[] args)
+        {
+            string command=string.Join(' ',args);
+            if(command=="ps --json")return Task.FromResult((0,"[{\"modelKey\":\"selected\",\"identifier\":\"user-session\",\"contextLength\":8192}]",""));
+            if(command=="ls --json")return Task.FromResult((0,"[{\"type\":\"llm\",\"modelKey\":\"selected\",\"displayName\":\"Selected\"}]",""));
+            if(command=="server status --json")return Task.FromResult((0,"{\"running\":true,\"port\":12345}",""));
+            if(command.StartsWith("load "))loadedByApp=true;
+            if(command.StartsWith("unload "))unloadedByApp=true;
+            throw new InvalidOperationException("Unexpected CLI call: "+command);
+        }
+        var handler=new FakeHandler();using var http=new HttpClient(handler);
+        var backend=new LmStudioBackend(new FakeProbe(),12345,http,Cli);
+        Assert.True(await backend.PrepareAsync("selected",CancellationToken.None));
+        var topic=new Topic(1,"animation","",50,168,30,true,[]);
+        var document=new Document(1,1,"https://example.com/post","Example","A detailed procedural animation article.","hash",null,DateTimeOffset.UtcNow,true,1,1);
+        Assert.NotNull(await backend.AnalyzeAsync(document,topic,CancellationToken.None));
+        Assert.Contains("user-session",handler.LastRequest);
+        await backend.CleanupAsync(CancellationToken.None);
+        Assert.False(loadedByApp);
+        Assert.False(unloadedByApp);
+    }
     [Fact] public async Task MissingSelectedModelIsReportedWithoutLoadingAnotherModel()
     {
         bool triedToLoad=false;

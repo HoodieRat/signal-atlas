@@ -4,7 +4,7 @@ Select the provider on the **AI Model** tab. Signal Atlas applies the selection 
 
 ## LM Studio (default)
 
-No OpenAI API key is needed for this option. In **Setup → AI model**, install LM Studio and a model, click **Find installed models**, highlight the model, click **Use selected model**, then click **Test selected model**. Testing also saves the highlighted model automatically. The test loads that exact model, runs a short local analysis, and unloads it afterward.
+No OpenAI API key is needed for this option. In **Setup → AI model**, install LM Studio and a model, click **Find installed models**, highlight the model, click **Use selected model**, then click **Test selected model**. Testing also saves the highlighted model automatically. The test runs a short local analysis with that exact model. If LM Studio already loaded it with enough context, Signal Atlas reuses it and leaves it loaded; otherwise the app loads and unloads its own copy.
 
 The app checks RAM, GPU budget, battery state, and CPU pressure before loading a model. If the test is deferred, its message names the selected model and the resource constraint. Free memory or choose a smaller installed model, then test again. Discovery cards can still be published while analysis is deferred.
 
