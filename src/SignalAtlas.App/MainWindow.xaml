@@ -17,7 +17,7 @@
           <TextBlock Text="1. Install LM Studio and a model" FontWeight="SemiBold"/>
           <WrapPanel><Button Content="Get LM Studio" Command="{Binding OpenLmStudioInstallCommand}"/><Button Content="Install fast model" Command="{Binding InstallFastCommand}"/><Button Content="Install quality model" Command="{Binding InstallQualityCommand}"/><Button Content="Find installed models" Command="{Binding LoadModelsCommand}"/></WrapPanel>
           <TextBlock Text="2. Highlight an installed model and use it" FontWeight="SemiBold" Margin="0,14,0,4"/>
-          <DataGrid ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" AutoGenerateColumns="False" IsReadOnly="True" Height="200"><DataGrid.Columns><DataGridTextColumn Header="Model" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="Size" Binding="{Binding SizeBytes}" Width="140"/></DataGrid.Columns></DataGrid>
+          <DataGrid ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" AutoGenerateColumns="False" IsReadOnly="True" Height="200"><DataGrid.Columns><DataGridTextColumn Header="Model" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="Size" Binding="{Binding SizeDisplay}" Width="140"/></DataGrid.Columns></DataGrid>
           <Button Content="Use selected model" Command="{Binding SelectModelCommand}" HorizontalAlignment="Left"/>
           <TextBlock Text="Selected model:"/><TextBlock Text="{Binding SelectedModelKey}" FontWeight="SemiBold" FontSize="18"/>
           <TextBlock Text="3. Test the selected model" FontWeight="SemiBold" Margin="0,14,0,4"/>

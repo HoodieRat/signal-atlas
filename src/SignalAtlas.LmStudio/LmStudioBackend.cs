@@ -8,7 +8,10 @@ using SignalAtlas.Resources;
 
 namespace SignalAtlas.LmStudio;
 
-public sealed record InstalledModel(string Key,string Name,long SizeBytes,string? Architecture,string? Quantization,int MaxContext);
+public sealed record InstalledModel(string Key,string Name,long SizeBytes,string? Architecture,string? Quantization,int MaxContext)
+{
+    public string SizeDisplay => SizeBytes<=0?"Unknown":$"{SizeBytes/1073741824d:F1} GiB";
+}
 public sealed class ResourceEmergencyException():Exception("Resource emergency during local inference");
 
 public sealed class LmStudioBackend : IModelBackend
