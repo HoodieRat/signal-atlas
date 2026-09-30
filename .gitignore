@@ -1,0 +1,36 @@
+**/bin/
+**/obj/
+packaging/release/
+packaging/validation/
+.vs/
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.user
+*.suo
+*.log
+*.jsonl
+
+# Runtime research data and account state
+**/data/
+**/state/
+**/logs/
+**/cache/
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite-*
+.codex/
+.env
+.env.*
+auth.json
+credentials.json
+secrets.json
+*.pem
+*.pfx
+*.p12
+*.key
+
+# Release archives are built locally
+*.zip

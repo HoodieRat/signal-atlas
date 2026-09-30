@@ -1,0 +1,1 @@
+ALTER TABLE report_items ADD COLUMN bookmarked INTEGER NOT NULL DEFAULT 0;

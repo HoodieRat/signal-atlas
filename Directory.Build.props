@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <PublishTrimmed>false</PublishTrimmed>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>

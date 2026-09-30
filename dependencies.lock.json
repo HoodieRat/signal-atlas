@@ -1,0 +1,8 @@
+{
+  "dokobot": { "testedVersion": "2.11.0", "package": "@dokobot/cli" },
+  "lmStudio": { "testedCliCommit": "07b7252", "note": "The installed lms CLI reports a commit rather than a semantic version; verify command compatibility during setup." },
+  "models": [
+    { "key": "qwen/qwen3-4b-2507", "role": "fast" },
+    { "key": "qwen/qwen3.5-4b", "role": "quality" }
+  ]
+}
